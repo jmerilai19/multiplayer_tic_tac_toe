@@ -2,8 +2,8 @@ class Game():
     def __init__(self, _id):
         self.symbols = {
             "empty": " ",
-            "0": "X",
-            "1": "O"
+            "0": "O",
+            "1": "X"
         }
 
         self.id = _id # game id
