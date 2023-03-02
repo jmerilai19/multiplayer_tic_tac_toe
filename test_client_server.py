@@ -1,6 +1,7 @@
-import requests
 from time import sleep
-from game import WAITING, INPROGRESS, WIN, DRAW
+import requests
+from server.game import DRAW, INPROGRESS, WAITING, WIN
+
 
 def print_board(board):
     print("     |     |     ")
@@ -97,3 +98,4 @@ if __name__ == "__main__":
         else:
             print(resp["error"])
 
+        sleep(1)

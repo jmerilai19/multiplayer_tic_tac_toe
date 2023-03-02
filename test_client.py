@@ -1,4 +1,4 @@
-import game
+import server.game as game
 
 def print_board(board):
     print("     |     |     ")
