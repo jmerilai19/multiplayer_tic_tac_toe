@@ -115,9 +115,9 @@ class Game():
 
     def get_player(self, token):
         if self._players["O"] != None and self._players["O"].token == token:
-            return self._players["O"]
+            return "O"
         elif self._players["X"] != None and self._players["X"].token == token:
-            return self._players["X"]
+            return "X"
         return None
 
     def remove_player(self, token):
@@ -134,8 +134,8 @@ class Game():
 
     def check_turn(self, token):
         if self.get_player(token) == self.symbols[str(self.turn)]:
-            return 0
-        return 1
+            return 1
+        return 0
 
 class Player():
     def __init__(self):
