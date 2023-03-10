@@ -14,12 +14,19 @@ def print_board(board):
     print(f"  {board[2][0]}  |  {board[2][1]}  |  {board[2][2]}  ")
     print("     |     |     ")
 
+def clear_screen():
+    # Clear screen
+    print("\033[2J", end="")
+    # Go to top left
+    print("\033[0;0H", end="")
+
+
 if __name__ == "__main__":
 
     menu = True
 
     while menu:
-        print("Start: 1, Join: 2, Rejoin: 3, Exit: 4")
+        print("Start: 1, Join: 2, Exit: 3")
         try:
             start = int(input("Enter: "))
         except ValueError:
@@ -49,20 +56,20 @@ if __name__ == "__main__":
                     print(resp["error"])
 
             elif start == 3:
-                print("Not implemented")
-
-            elif start == 4:
                 exit()
 
             else:
                 print("Invalid input")
 
     while True:
+        clear_screen()
         resp = requests.get(f"http://localhost:5000/{game_id}/getgamestatus").json()
         if "error" not in resp:
             status = resp["status"]
             if status == WAITING:
+                print("Game ID: " + str(game_id))
                 print("Waiting for other player to join...")
+
             elif status == INPROGRESS:
                 print_board(resp["board"])
                 if resp["turn"] == mysymbol:
@@ -90,6 +97,7 @@ if __name__ == "__main__":
                 print(f"{str(resp['turn'])} wins!")
                 resp = requests.post(f"http://localhost:5000/{game_id}/endgame", json={"token": token}).json()
                 break
+
             elif status == DRAW:
                 print_board(resp["board"])
                 print("Draw!")
