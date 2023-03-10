@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 WAITING = 0
 INPROGRESS = 1
@@ -19,6 +20,8 @@ class Game():
         self.status = WAITING
 
         self.turn = 0
+
+        self.start_time = datetime.now()
 
     def start(self):
         self.board = self.init_board()

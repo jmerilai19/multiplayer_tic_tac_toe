@@ -1,6 +1,7 @@
 from time import sleep
 import requests
 from server.game import DRAW, INPROGRESS, WAITING, WIN
+import os
 
 
 def print_board(board):
@@ -15,11 +16,7 @@ def print_board(board):
     print("     |     |     ")
 
 def clear_screen():
-    # Clear screen
-    print("\033[2J", end="")
-    # Go to top left
-    print("\033[0;0H", end="")
-
+    os.system("cls" if os.name == "nt" else "clear")
 
 if __name__ == "__main__":
 
@@ -107,3 +104,5 @@ if __name__ == "__main__":
             print(resp["error"])
 
         sleep(1)
+
+    sleep(5)
