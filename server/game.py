@@ -89,17 +89,54 @@ class Game():
     def add_player(self):
         if self._players["O"] == None:
             # Generate token for player
-            self._players["O"] = os.urandom(2).hex()
-            return self._players["O"], "O"
+            self._players["O"] = Player()
+            return self._players["O"].token, "O"
+
         elif self._players["X"] == None:
             # Generate token for player
-            self._players["X"] = os.urandom(2).hex()
+            self._players["X"] = Player()
             self.status = INPROGRESS
-            return self._players["X"], "X"
+            return self._players["X"].token, "X"
+
         else:
             return "Full"
 
+    def number_of_players(self):
+        count = 0
+        for player in self._players.values():
+            if player != None:
+                count += 1
+        return count
+
     def is_full(self):
-        if self._players["O"] != None and self._players["X"] != None:
+        if self.number_of_players() == 2:
             return 1
         return 0
+
+    def get_player(self, token):
+        if self._players["O"] != None and self._players["O"].token == token:
+            return self._players["O"]
+        elif self._players["X"] != None and self._players["X"].token == token:
+            return self._players["X"]
+        return None
+
+    def remove_player(self, token):
+        # If player is removed when game is in progress
+        if self.status == INPROGRESS:
+            self.status == WAITING
+
+        symbol = self.get_player(token)
+        if symbol != None:
+            self._players[symbol] = None
+            return 0
+        else:
+            return 1
+
+    def check_turn(self, token):
+        if self.get_player(token) == self.symbols[str(self.turn)]:
+            return 0
+        return 1
+
+class Player():
+    def __init__(self):
+        self.token = os.urandom(2).hex()

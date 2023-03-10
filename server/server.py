@@ -58,8 +58,12 @@ def play(id):
         return {"error": "Game does not exist"}
 
     # Check if it's the player's turn
-    if token != games[id]._players[games[id].symbols[str(games[id].turn)]]:
+    if games[id].check_turn(token) == 0:
         return {"error": "It's not your turn"}
+
+    # Check if enough players
+    if games[id].number_of_players() < 2:
+        return {"error": "Not enough players"}
 
     # Play move
     result = games[id].play(x, y)
@@ -75,13 +79,15 @@ def play(id):
 def end_game(id):
     data = request.get_json()
     token = data["token"]
-    # End game
-    if id in games:
-        if token in games[id]._players.values():
-            symbol = {i for i in games[id]._players if games[id]._players[i]==token}.pop()
-            games[id]._players.pop(symbol)
 
-        if len(games[id]._players) == 0:
+    # Check if game exists
+    if id in games:
+        # Remove player from game
+        if games[id].get_player(token) != None:
+            games[id].remove_player(token)
+
+        # Delete game if no players left
+        if games[id].number_of_players() == 0:
             games.pop(id)
             return {"message": "Game deleted"}
 
