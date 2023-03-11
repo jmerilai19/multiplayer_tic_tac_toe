@@ -1,6 +1,7 @@
-from time import sleep
 import requests
 import os
+
+from time import sleep
 
 
 WAITING = 0

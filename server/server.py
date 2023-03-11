@@ -1,7 +1,9 @@
-import game
-from flask import Flask, redirect, request, url_for
 import requests
+
+from flask import Flask, redirect, request, url_for
 from datetime import datetime
+
+import game
 
 app = Flask(__name__)
 
