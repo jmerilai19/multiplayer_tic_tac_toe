@@ -1,8 +1,12 @@
 from time import sleep
 import requests
-from server.game import DRAW, INPROGRESS, WAITING, WIN
 import os
 
+
+WAITING = 0
+INPROGRESS = 1
+WIN = 2
+DRAW = 3
 
 def print_board(board):
     print("     |     |     ")
