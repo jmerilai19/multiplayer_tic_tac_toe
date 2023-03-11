@@ -1,5 +1,7 @@
 import game
 from flask import Flask, redirect, request, url_for
+import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -85,6 +87,18 @@ def end_game(id):
         # Remove player from game
         if games[id].get_player(token) != None:
             games[id].remove_player(token)
+
+        result = ""
+        if games[id].status == game.WIN:
+            if games[id].turn == 0:
+                result = "O"
+            else:
+                result = "X"
+        elif games[id].status == game.DRAW:
+            result = "DRAW"
+        
+        # Save game in database
+        resp = requests.post("http://172.17.0.1:3000/game_history/", json={"result": result, "game_id": games[id].id, "start_time": str(games[id].start_time), "end_time": str(datetime.now())})
 
         # Delete game if no players left
         if games[id].number_of_players() == 0:

@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 from jsonschema import validate, ValidationError
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 
 app = Flask(__name__)
@@ -13,6 +14,7 @@ api = Api(app)
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, unique=True, nullable=False)
     result = db.Column(db.String(5), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
@@ -20,6 +22,7 @@ class Game(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "game_id": self.game_id,
             "result": self.result,
             "start_time": str(self.start_time),
             "end_time": str(self.end_time)
@@ -29,10 +32,11 @@ class Game(db.Model):
     def json_schema():
         schema = {
             "type": "object",
-            "required": ["result"]
+            "required": ["result", "game_id"]
         }
         props = schema["properties"] = {}
-        props["result"] = {"type": "string", "enum": ["O", "X" "DRAW"]}
+        props["result"] = {"type": "string", "enum": ["O", "X", "DRAW"]}
+        props["game_id"] = {"type": "integer"}
         props["start_time"] = {"type": "string"}
         props["end_time"] = {"type": "string"}
 
@@ -58,16 +62,20 @@ class GameHistoryCollection(Resource):
         except ValidationError:
             return Response(status = 415)
         
-        game = Game(result = request_dict["result"],
-                    start_time = datetime.now(),
-                    end_time = datetime.now())
+        try:
+            game = Game(result = request_dict["result"],
+                        game_id = request_dict["game_id"],
+                        start_time = datetime.strptime(request_dict["start_time"], "%Y-%m-%d %H:%M:%S.%f"),
+                        end_time = datetime.strptime(request_dict["end_time"], "%Y-%m-%d %H:%M:%S.%f"))
 
-        db.session.add(game)
-        db.session.commit()
+            db.session.add(game)
+            db.session.commit()
+        except IntegrityError:
+            return Response(status = 409)
 
         return Response(status = 201)
 
-api.add_resource(GameHistoryCollection, "/api/game_history/")
+api.add_resource(GameHistoryCollection, "/game_history/")
 
 with app.app_context():
     db.create_all()
