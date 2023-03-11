@@ -37,6 +37,7 @@ def join_game(id):
 
     # Add player to game
     token, player = games[id].add_player()
+
     return {"token": token, "player": player}
 
 
@@ -75,7 +76,6 @@ def play(id):
     if result == 0 or result == 2 or result == 3:
         # Return game info
         return redirect(url_for("get_game_status", id=id))
-
     else:
         return {"error": "Invalid move"}
 
@@ -90,6 +90,7 @@ def end_game(id):
         if games[id].get_player(token) != None:
             games[id].remove_player(token)
 
+        # Format result for database (O, X, DRAW)
         result = ""
         if games[id].status == game.WIN:
             if games[id].turn == 0:
@@ -100,7 +101,8 @@ def end_game(id):
             result = "DRAW"
         
         # Save game in database
-        resp = requests.post("http://172.17.0.1:3000/game_history/", json={"result": result, "game_id": games[id].id, "start_time": str(games[id].start_time), "end_time": str(datetime.now())})
+        content = {"result": result, "game_id": games[id].id, "start_time": str(games[id].start_time), "end_time": str(datetime.now())}
+        resp = requests.post("http://172.17.0.1:3000/game_history/", json=content)
 
         # Delete game if no players left
         if games[id].number_of_players() == 0:
@@ -109,8 +111,8 @@ def end_game(id):
 
         else:
             return {"message": "Player removed from game"}
+        
     return {"error": "Game does not exist"}
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

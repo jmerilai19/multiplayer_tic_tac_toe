@@ -45,25 +45,30 @@ class Game(db.Model):
 
 class GameHistoryCollection(Resource):
     def get(self):
-        print("get")
+        # Return all games in database
         games = Game.query.all()
         games_json = []
+
         for game in games:
             games_json.append(game.serialize())
+
         return Response(json.dumps(games_json), 200)
     
     def post(self):
+        # Is the request body in JSON format?
         try:
             request_dict = json.loads(request.data)
         except:
             return Response(status = 415)
         
+        # Does the request body match the JSON schema?
         try:
             validate(request_dict, Game.json_schema())
         except ValidationError:
             return Response(status = 415)
         
         try:
+            # Add game to database
             game = Game(result = request_dict["result"],
                         game_id = request_dict["game_id"],
                         start_time = datetime.strptime(request_dict["start_time"], "%Y-%m-%d %H:%M:%S.%f"),
@@ -72,12 +77,15 @@ class GameHistoryCollection(Resource):
             db.session.add(game)
             db.session.commit()
         except IntegrityError:
+            # Game already exists
             return Response(status = 409)
 
         return Response(status = 201)
 
+# Add route
 api.add_resource(GameHistoryCollection, "/game_history/")
 
+# Initialize database
 with app.app_context():
     db.create_all()
     db.session.commit()
