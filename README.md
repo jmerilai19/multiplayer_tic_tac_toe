@@ -14,7 +14,7 @@
 ```
 pip install -r requirements.txt
 ```
-This installs packages needed for client.
+This installs some needed packages.
 
 <br />
 
