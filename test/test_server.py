@@ -6,8 +6,11 @@ from os.path import abspath, dirname, join
 
 GAMESERVER_URL = "http://localhost:5000"
 
-@pytest.mark.parametrize("n, threshold", [(1, 1), (10, 1), (100, 1)])
+@pytest.mark.parametrize("n, threshold", [(1, 1), (10, 1), (100, 1), (1000, 1)])
 def test_latency(n, threshold):
+    """
+    Test latency of requests
+    """
 
     threads = []
     for i in range(n):
@@ -36,6 +39,46 @@ def test_latency(n, threshold):
         f.write(f"n: {n}, threshold: {threshold}, avg: {avg_latency}, max: {max_latency}, min: {min_latency}\n")
 
     assert avg_latency < threshold, f"Too high average latency {avg_latency} > {threshold}"
+
+
+def test_end_game():
+    """
+    Check that game ends properly when both players have ended the game
+    """
+    # Create game
+    resp = requests.get(GAMESERVER_URL + f"/creategame")
+    data = resp.json()
+    assert resp.status_code == 200
+    assert "game_id" in data
+    assert "token" in data
+
+    game_id = data["game_id"]
+    token1 = data["token"]
+
+    # Join game
+    resp = requests.post(GAMESERVER_URL + f"/{game_id}/joingame")
+    data = resp.json()
+    assert resp.status_code == 200
+    assert "token" in data
+
+    token2 = data["token"]
+
+    # Try to end two games at the same time
+    url = GAMESERVER_URL + f"/{game_id}/endgame"
+    t1 = SendRequestThread("post", url, json={"token": token1})
+    t2 = SendRequestThread("post", url, json={"token": token2})
+
+    t1.start()
+    t2.start()
+
+    t1.join()
+    t2.join()
+
+    data1 = t1.data
+    data2 = t2.data
+
+    assert data1["message"] == "Game deleted" or data2["message"] == "Game deleted"
+    assert data1["message"] == "Player removed from game" or data2["message"] == "Player removed from game"
 
 
 class GameThread(threading.Thread):
@@ -130,3 +173,17 @@ class GameThread(threading.Thread):
         assert resp.status_code == 200, f"Game {number} failed"
         resp = requests.post(GAMESERVER_URL + f"/{game_id}/endgame", json={"token": token2})
         assert resp.status_code == 200, f"Game {number} failed"
+
+
+class SendRequestThread(threading.Thread):
+    def __init__(self, method, url, json=None):
+        super().__init__(target=self.send_request, kwargs={"method": method, "url": url, "json": json})
+        self.data = None
+
+    def send_request(self, method, url, json=None):
+        if method == "get":
+            resp = requests.get(url)
+            self.data = resp.json()
+        elif method == "post":
+            resp = requests.post(url, json=json)
+            self.data = resp.json()
