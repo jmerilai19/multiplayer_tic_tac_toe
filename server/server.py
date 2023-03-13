@@ -5,6 +5,8 @@ import game
 import requests
 from flask import Flask, redirect, request, url_for
 
+DATABASE_URL = "http://172.17.0.1:3000"
+
 app = Flask(__name__)
 
 game_id_lock = multiprocessing.Lock()
@@ -110,7 +112,7 @@ def end_game(id):
 
             # Save game in database
             content = {"result": result, "game_id": games[id].id, "start_time": str(games[id].start_time), "end_time": str(datetime.now())}
-            resp = requests.post("http://172.17.0.1:3000/game_history/", json=content)
+            resp = requests.post(DATABASE_URL + "/game_history/", json=content)
 
             # Delete game if no players left
             if games[id].number_of_players() == 0:

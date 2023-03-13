@@ -4,6 +4,7 @@ import time
 import threading
 from os.path import abspath, dirname, join
 
+GAMESERVER_URL = "http://localhost:5000"
 
 @pytest.mark.parametrize("n, threshold", [(1, 1), (10, 1), (100, 1)])
 def test_latency(n, threshold):
@@ -50,7 +51,7 @@ class GameThread(threading.Thread):
         self.latencies = []
 
         start = time.time()
-        resp = requests.get(f"http://localhost:5000/creategame")
+        resp = requests.get(GAMESERVER_URL + f"/creategame")
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -62,7 +63,7 @@ class GameThread(threading.Thread):
         token1 = data["token"]
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/joingame")
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/joingame")
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -72,7 +73,7 @@ class GameThread(threading.Thread):
         token2 = data["token"]
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/play", json={"token": token1, "x": 0, "y": 0})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/play", json={"token": token1, "x": 0, "y": 0})
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -83,7 +84,7 @@ class GameThread(threading.Thread):
         assert data["status"] == 1, f"Game {number} failed"
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/play", json={"token": token2, "x": 0, "y": 1})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/play", json={"token": token2, "x": 0, "y": 1})
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -94,7 +95,7 @@ class GameThread(threading.Thread):
         assert data["status"] == 1, f"Game {number} failed"
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/play", json={"token": token1, "x": 1, "y": 1})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/play", json={"token": token1, "x": 1, "y": 1})
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -105,7 +106,7 @@ class GameThread(threading.Thread):
         assert data["status"] == 1, f"Game {number} failed"
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/play", json={"token": token2, "x": 0, "y": 2})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/play", json={"token": token2, "x": 0, "y": 2})
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -116,7 +117,7 @@ class GameThread(threading.Thread):
         assert data["status"] == 1, f"Game {number} failed"
 
         start = time.time()
-        resp = requests.post(f"http://localhost:5000/{game_id}/play", json={"token": token1, "x": 2, "y": 2})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/play", json={"token": token1, "x": 2, "y": 2})
         end = time.time()
         self.latencies.append(end - start)
         data = resp.json()
@@ -125,7 +126,7 @@ class GameThread(threading.Thread):
         assert "board" in data, f"Game {number} failed"
         assert "turn" in data, f"Game {number} failed"
 
-        resp = requests.post(f"http://localhost:5000/{game_id}/endgame", json={"token": token1})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/endgame", json={"token": token1})
         assert resp.status_code == 200, f"Game {number} failed"
-        resp = requests.post(f"http://localhost:5000/{game_id}/endgame", json={"token": token2})
+        resp = requests.post(GAMESERVER_URL + f"/{game_id}/endgame", json={"token": token2})
         assert resp.status_code == 200, f"Game {number} failed"
