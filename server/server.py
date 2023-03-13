@@ -51,19 +51,21 @@ def join_game(id):
 @app.route("/<id>/getgamestatus", methods=["GET"])
 def get_game_status(id):
     # Check if game exists
-    if id not in games:
+    try:
+        # Return game info
+        return {"status": games[id].status, "board": games[id].board, "turn": games[id].symbols[str(games[id].turn)]}
+    except KeyError:
         return {"error": "Game does not exist"}
-
-    # Return game info
-    return {"status": games[id].status, "board": games[id].board, "turn": games[id].symbols[str(games[id].turn)]}
-
 
 @app.route("/<id>/play", methods=["POST"])
 def play(id):
-    data = request.get_json()
-    token = data["token"]
-    x = data["x"]
-    y = data["y"]
+    try:
+        data = request.get_json()
+        token = data["token"]
+        x = data["x"]
+        y = data["y"]
+    except KeyError:
+        return {"error": "Invalid request"}
 
     # Check if game exists
     try:
@@ -90,8 +92,11 @@ def play(id):
 
 @app.route("/<id>/endgame", methods=["POST"])
 def end_game(id):
-    data = request.get_json()
-    token = data["token"]
+    try:
+        data = request.get_json()
+        token = data["token"]
+    except KeyError:
+        return {"error": "Invalid request"}
 
     # Check if game exists
     try:
