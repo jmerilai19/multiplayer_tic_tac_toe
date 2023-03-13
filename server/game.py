@@ -1,7 +1,6 @@
 import os
-
 from datetime import datetime
-
+from multiprocessing import Lock
 
 WAITING = 0
 INPROGRESS = 1
@@ -20,6 +19,7 @@ class Game():
         self.board = []
         self._players = {"O": None, "X": None}
         self.status = WAITING
+        self.lock = Lock()
 
         self.turn = 0
 
